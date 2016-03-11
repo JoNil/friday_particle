@@ -63,16 +63,6 @@ void updateParticles(Particle particle, int i, GLuint VBO) {
 	glEnableVertexAttribArray(0);
 }
 
-void draw_quad(Particle particle)
-{
-    glBegin(GL_QUADS);
-    glVertex3f(-particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
-    glVertex3f( particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
-    glVertex3f( particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
-    glVertex3f(-particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
-    glEnd();
-}
-
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
