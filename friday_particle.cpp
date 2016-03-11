@@ -12,26 +12,24 @@
 
 using namespace glm;
 
-const char * vertex_shader_source = ""
-"#version 330 core"
-""
-"layout(location = 0) in vec3 vertex_pos;"
-""
-"void main() {"
-"    gl_Position = vec4(vertex_pos, 1.0f);"
-"}"
-"";
+#define GLSL(version, shader) "#version " #version "\n" #shader
 
-const char * fragment_shader_source = ""
-"#version 330 core"
-""
-"layout(location = 0) out vec4 color;"
-""
-"void main()"
-"{"
-"   color = vec4(1.0f, 0.0f, 0.0f, 1.0f);"
-"}"
-"";
+const char * vertex_shader_source = GLSL(330,
+
+layout(location = 0) in vec3 vertex_pos;
+
+void main() {
+    gl_Position = vec4(vertex_pos, 1.0f);
+});
+
+const char * fragment_shader_source = GLSL(330,
+
+layout(location = 0) out vec4 color;
+
+void main()
+{
+   color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+});
 
 static void print_shader_compile_error(uint32_t shader)
 {
@@ -39,8 +37,6 @@ static void print_shader_compile_error(uint32_t shader)
 
     int length = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-
-    printf("%d\n", length);
 
     infolog.resize((size_t)length);
 
@@ -98,6 +94,9 @@ int main(int argc, char ** argv)
     std::srand(std::time(0));
 
     glfwInit();
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     GLFWwindow * window = glfwCreateWindow(width, height, "Friday particle", NULL, NULL);
 	glfwSwapInterval(1);
