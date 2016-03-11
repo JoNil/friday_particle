@@ -11,13 +11,19 @@
 
 using namespace glm;
 
-void draw_quad(vec2 pos)
+struct Particle {
+	vec2 pos;
+	vec2 speed;
+	float size = 0.1;
+};
+
+void draw_quad(Particle particle)
 {
     glBegin(GL_QUADS);
-    glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(-0.05f + pos.x, -0.05f + pos.y, -1.0f);
-    glColor3f(0.0f, 1.0f, 0.0f); glVertex3f( 0.05f + pos.x, -0.05f + pos.y, -1.0f);
-    glColor3f(0.0f, 0.0f, 1.0f); glVertex3f( 0.05f + pos.x,  0.05f + pos.y, -1.0f);
-    glColor3f(1.0f, 1.0f, 0.0f); glVertex3f(-0.05f + pos.x,  0.05f + pos.y, -1.0f);
+    glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(-particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
+    glColor3f(0.0f, 1.0f, 0.0f); glVertex3f( particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
+    glColor3f(0.0f, 0.0f, 1.0f); glVertex3f( particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
+    glColor3f(1.0f, 1.0f, 0.0f); glVertex3f(-particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
     glEnd();
 }
 
@@ -27,11 +33,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
 }
-
-struct Particle {
-    vec2 pos;
-    vec2 speed;
-};
 
 void simulate_particles(Particle * particles, int particle_count, float dt)
 {
@@ -95,7 +96,7 @@ int main(int argc, char ** argv)
         simulate_particles(particles.data(), particles.size(), deltaTime);
 
         for (int i = 0; i < (int)particles.size(); ++i) {
-            draw_quad(particles[i].pos);
+            draw_quad(particles[i]);
         }
 
         glfwSwapBuffers(window);
