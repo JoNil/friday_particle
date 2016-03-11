@@ -7,33 +7,42 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <cstdint>
 #include <vector>
+#include <string>
 
 using namespace glm;
 
-const char * vertex_shader = "
-layout(location = 0) in vec3 vertex_pos;
+const char * vertex_shader_source = ""
+"layout(location = 0) in vec3 vertex_pos;"
+""
+"void main() {"
+"    gl_Position = vec4(vertex_pos.xyz, 1.0f);"
+"}"
+"";
 
-void main() {    
-    gl_Position = vec4(vertex_pos.xyz, 1.0f);
-}
-";
+const char * fragment_shader_source = ""
+"layout(location = 0) out vec4 color;"
+""
+"void main()"
+"{"
+"   color = vec4(1.0f, 0.0f, 0.0f, 1.0f);"
+"}"
+"";
 
-const char * fragment_shader = "
-
-layout(location = 0) out vec4 color;
-
-uniform sampler2D tex;
-uniform float alphaFade;
-uniform float colorFade;
-
-void main()
+static void print_shader_compile_error(uint32_t shader)
 {
-    vec4 texColor = texture(tex, frag_uv);
+    std::string infolog;
 
-    color = vec4(colorFade * texColor.xyz, alphaFade * texColor.a);
+    int length = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+
+    infolog.resize((size_t)length);
+
+    glGetShaderInfoLog(shader, length, nullptr, &infolog[0]);
+
+    printf("%s", infolog.c_str());
 }
-";
 
 struct Particle {
 	vec2 pos;
@@ -44,10 +53,10 @@ struct Particle {
 void draw_quad(Particle particle)
 {
     glBegin(GL_QUADS);
-    glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(-particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
-    glColor3f(0.0f, 1.0f, 0.0f); glVertex3f( particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
-    glColor3f(0.0f, 0.0f, 1.0f); glVertex3f( particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
-    glColor3f(1.0f, 1.0f, 0.0f); glVertex3f(-particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
+    glVertex3f(-particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
+    glVertex3f( particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
+    glVertex3f( particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
+    glVertex3f(-particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
     glEnd();
 }
 
@@ -88,6 +97,9 @@ int main(int argc, char ** argv)
 
     glfwMakeContextCurrent(window);
     glfwGetFramebufferSize(window, &width, &height);
+
+    glewInit();
+
     glViewport(0, 0, width, height);
 
     std::vector<Particle> particles(1000);
@@ -105,6 +117,25 @@ int main(int argc, char ** argv)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    uint32_t vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    uint32_t fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
+
+    int status = 0;
+    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &status);
+    if (status == GL_FALSE) {
+        print_shader_compile_error(vertex_shader);
+    }
+    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &status);
+    if (status == GL_FALSE) {
+        print_shader_compile_error(fragment_shader);
+    }
+
+    uint32_t shader_program = glCreateProgram();
+
+
 
 	float oldTime = 0;
 	float newTime = glfwGetTime();
