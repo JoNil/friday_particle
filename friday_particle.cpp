@@ -11,6 +11,30 @@
 
 using namespace glm;
 
+const char * vertex_shader = "
+layout(location = 0) in vec3 vertex_pos;
+
+void main() {    
+    gl_Position = vec4(vertex_pos.xyz, 1.0f);
+}
+";
+
+const char * fragment_shader = "
+
+layout(location = 0) out vec4 color;
+
+uniform sampler2D tex;
+uniform float alphaFade;
+uniform float colorFade;
+
+void main()
+{
+    vec4 texColor = texture(tex, frag_uv);
+
+    color = vec4(colorFade * texColor.xyz, alphaFade * texColor.a);
+}
+";
+
 struct Particle {
 	vec2 pos;
 	vec2 speed;
