@@ -22,10 +22,10 @@ void draw_quad(vec2 pos) {
     glLoadIdentity();
 
     glBegin(GL_QUADS);
-        glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(-0.75f + pos.x, -0.75f + pos.y, -1.0f);
-        glColor3f(0.0f, 1.0f, 0.0f); glVertex3f( 0.75f + pos.x, -0.75f + pos.y, -1.0f);
-        glColor3f(0.0f, 0.0f, 1.0f); glVertex3f( 0.75f + pos.x,  0.75f + pos.y, -1.0f);
-        glColor3f(1.0f, 1.0f, 0.0f); glVertex3f(-0.75f + pos.x,  0.75f + pos.y, -1.0f);
+        glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(-0.05f + pos.x, -0.05f + pos.y, -1.0f);
+        glColor3f(0.0f, 1.0f, 0.0f); glVertex3f( 0.05f + pos.x, -0.05f + pos.y, -1.0f);
+        glColor3f(0.0f, 0.0f, 1.0f); glVertex3f( 0.05f + pos.x,  0.05f + pos.y, -1.0f);
+        glColor3f(1.0f, 1.0f, 0.0f); glVertex3f(-0.05f + pos.x,  0.05f + pos.y, -1.0f);
     glEnd();
 }
 
@@ -45,7 +45,7 @@ void simulate_particles(Particle * particles, int particle_count, float dt)
 {
     for (int i = 0; i < particle_count; ++i) {
         particles[i].pos += particles[i].speed * dt;
-        particles[i].speed += particles[i].pos * dt;
+        particles[i].speed -= particles[i].pos * dt;
     }
 }
 
