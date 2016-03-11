@@ -13,6 +13,8 @@
 using namespace glm;
 
 const char * vertex_shader_source = ""
+"#version 330 core"
+""
 "layout(location = 0) in vec3 vertex_pos;"
 ""
 "void main() {"
@@ -21,6 +23,8 @@ const char * vertex_shader_source = ""
 "";
 
 const char * fragment_shader_source = ""
+"#version 330 core"
+""
 "layout(location = 0) out vec4 color;"
 ""
 "void main()"
@@ -36,11 +40,13 @@ static void print_shader_compile_error(uint32_t shader)
     int length = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
 
+    printf("%d\n", length);
+
     infolog.resize((size_t)length);
 
     glGetShaderInfoLog(shader, length, nullptr, &infolog[0]);
 
-    printf("%s", infolog.c_str());
+    printf("%s\n", infolog.c_str());
 }
 
 struct Particle {
@@ -132,16 +138,31 @@ int main(int argc, char ** argv)
     int status = 0;
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
+        printf("Vertex shader error:\n");
         print_shader_compile_error(vertex_shader);
+        exit(1);
     }
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
+        printf("Fragment shader error:\n");
         print_shader_compile_error(fragment_shader);
+        exit(1);
     }
 
     uint32_t shader_program = glCreateProgram();
+    glAttachShader(shader_program, vertex_shader);
+    glAttachShader(shader_program, fragment_shader);
+    glLinkProgram(shader_program);
 
+    glValidateProgram(shader_program);
+    glGetProgramiv(shader_program, GL_VALIDATE_STATUS, &status);
+    if (status == GL_FALSE) {
+        printf("Link error\n");
+        print_shader_compile_error(shader_program);
+        exit(1);
+    }
 
+    glUseProgram(shader_program);
 
 	float oldTime = 0;
 	float newTime = glfwGetTime();
