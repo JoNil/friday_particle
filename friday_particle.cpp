@@ -1,8 +1,10 @@
 #include <cstdio>
 
-#include <GLFW/glfw3.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
+#include <GLFW/glfw3.h>
+#include <glm/vec2.hpp>
+
+using namespace glm;
 
 void draw_quad() {
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -14,7 +16,6 @@ void draw_quad() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0., 0., 10., 0., 0., 0., 0., 1., 0.);
 
     glBegin(GL_QUADS);
         glColor3f(1., 0., 0.); glVertex3f(-.75, -.75, 0.);
@@ -28,6 +29,19 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+}
+
+struct Particle {
+    vec2 pos;
+    vec2 speed;
+};
+
+void simulate_particles(Particle * particles, int particle_count, float dt)
+{
+    for (int i = 0; i < particle_count; ++i) {
+        particles[i].pos += particles[i].speed * dt;
+        particles[i].speed -= particles[i].pos * dt;
     }
 }
 
