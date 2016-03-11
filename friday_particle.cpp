@@ -49,30 +49,18 @@ struct Particle {
 	float size = 0.1;
 };
 
-void initializeParticle(Particle particle, int i) {
+void updateParticles(Particle particle, int i, GLuint VBO) {
 	GLfloat vertices[] = {
 		-particle.size / 2 + particle.pos.x, -particle.size / 2 + particle.pos.y, -1.0f,
 		particle.size / 2 + particle.pos.x, -particle.size / 2 + particle.pos.y, -1.0f,
 		particle.size / 2 + particle.pos.x,  particle.size / 2 + particle.pos.y, -1.0f,
 		-particle.size / 2 + particle.pos.x,  particle.size / 2 + particle.pos.y, -1.0f
 	};
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(i);
-	glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
-}
-
-void draw_quad(Particle particle)
-{
-    glBegin(GL_QUADS);
-    glVertex3f(-particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
-    glVertex3f( particle.size/2 + particle.pos.x, -particle.size/2 + particle.pos.y, -1.0f);
-    glVertex3f( particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
-    glVertex3f(-particle.size/2 + particle.pos.x,  particle.size/2 + particle.pos.y, -1.0f);
-    glEnd();
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -157,7 +145,10 @@ int main(int argc, char ** argv)
 
 	float oldTime = 0;
 	float newTime = glfwGetTime();
-
+	GLuint VAO;
+	glGenVertexArrays(1, &VAO);
+	GLuint VBO;
+	glGenBuffers(1, &VBO);
     while (!glfwWindowShouldClose(window)) {
 
 		oldTime = newTime;
@@ -167,14 +158,13 @@ int main(int argc, char ** argv)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         simulate_particles(particles.data(), particles.size(), deltaTime);
-		GLuint VAO;
-		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
         for (int i = 0; i < (int)particles.size(); ++i) {
-            initializeParticle(particles[i], i);
+            updateParticles(particles[i], i, VBO);
+			glDrawArrays(GL_QUADS, 0, 4);
+			glBindVertexArray(0);
         }
-		glDrawArrays(GL_QUADS, 0, (int)particles.size());
-		glBindVertexArray(0);
+		
 
 
         glfwSwapBuffers(window);
