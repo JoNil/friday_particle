@@ -37,8 +37,13 @@ void simulate_particles(Particle * particles, int particle_count, float dt)
 {
 	
     for (int i = 0; i < particle_count; ++i) {
+
+        float random_x = (float)(std::rand() % 1000 - 500) / 40000.0f;
+        float random_y = (float)(std::rand() % 1000 - 500) / 40000.0f;
+
         particles[i].pos += particles[i].speed * dt;
         particles[i].speed -= particles[i].pos * dt;
+        particles[i].speed += vec2(random_x, random_y);
     }
 }
 
