@@ -18,7 +18,7 @@ const char * vertex_shader_source = ""
 "layout(location = 0) in vec3 vertex_pos;"
 ""
 "void main() {"
-"    gl_Position = vec4(vertex_pos.xyz, 1.0f);"
+"    gl_Position = vec4(vertex_pos, 1.0f);"
 "}"
 "";
 
@@ -130,18 +130,21 @@ int main(int argc, char ** argv)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    int status = 0;
     uint32_t vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     uint32_t fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
     glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
 
-    int status = 0;
+    glCompileShader(vertex_shader);
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
         printf("Vertex shader error:\n");
         print_shader_compile_error(vertex_shader);
         exit(1);
     }
+
+    glCompileShader(fragment_shader);
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
         printf("Fragment shader error:\n");
