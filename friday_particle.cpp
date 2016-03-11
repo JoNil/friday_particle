@@ -33,15 +33,20 @@ const char * vertex_shader_source = GLSL(130,
 
 attribute vec3 vertex_pos;
 
+varying vec3 pos;
+
 void main() {
-    gl_Position = vec4(vertex_pos, 1.0f);
+    pos = vertex_pos;
+    gl_Position = vec4(vertex_pos, 1.0);
 });
 
 const char * fragment_shader_source = GLSL(130,
 
+varying vec3 pos;
+
 void main()
 {
-   gl_FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+   gl_FragColor = vec4(1.0, 2.0 * pos.x + 1.0, 2.0 * pos.y + 1.0, 1.0);
 });
 
 static void print_shader_compile_error(uint32_t shader)
