@@ -7,21 +7,21 @@
 using namespace glm;
 
 void draw_quad() {
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-1., 1., -1., 1., 1., 20.);
+    glOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 20.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
     glBegin(GL_QUADS);
-        glColor3f(1., 0., 0.); glVertex3f(-.75, -.75, 0.);
-        glColor3f(0., 1., 0.); glVertex3f( .75, -.75, 0.);
-        glColor3f(0., 0., 1.); glVertex3f( .75,  .75, 0.);
-        glColor3f(1., 1., 0.); glVertex3f(-.75,  .75, 0.);
+        glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(-0.75f, -0.75f, -1.0f);
+        glColor3f(0.0f, 1.0f, 0.0f); glVertex3f( 0.75f, -0.75f, -1.0f);
+        glColor3f(0.0f, 0.0f, 1.0f); glVertex3f( 0.75f,  0.75f, -1.0f);
+        glColor3f(1.0f, 1.0f, 0.0f); glVertex3f(-0.75f,  0.75f, -1.0f);
     glEnd();
 }
 
@@ -41,7 +41,7 @@ void simulate_particles(Particle * particles, int particle_count, float dt)
 {
     for (int i = 0; i < particle_count; ++i) {
         particles[i].pos += particles[i].speed * dt;
-        particles[i].speed -= particles[i].pos * dt;
+        particles[i].speed += particles[i].pos * dt;
     }
 }
 
