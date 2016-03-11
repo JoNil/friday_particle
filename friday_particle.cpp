@@ -1,5 +1,5 @@
 #include <GL/glew.h>
-#include <GL/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 
 #include <cstdio>
@@ -58,11 +58,8 @@ void updateParticles(Particle particle, int i, GLuint VBO) {
 		particle.size / 2 + particle.pos.x,  particle.size / 2 + particle.pos.y, -1.0f,
 		-particle.size / 2 + particle.pos.x,  particle.size / 2 + particle.pos.y, -1.0f
 	};
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -122,13 +119,6 @@ int main(int argc, char ** argv)
 
     glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 20.0f);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
     int status = 0;
     uint32_t vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     uint32_t fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -168,10 +158,14 @@ int main(int argc, char ** argv)
 
 	float oldTime = 0;
 	float newTime = glfwGetTime();
-	GLuint VAO;
-	glGenVertexArrays(1, &VAO);
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
+
+    GLuint VBO;
+    glGenBuffers(1, &VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
     while (!glfwWindowShouldClose(window)) {
 
 		oldTime = newTime;
@@ -181,12 +175,11 @@ int main(int argc, char ** argv)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         simulate_particles(particles.data(), particles.size(), deltaTime);
-		glBindVertexArray(VAO);
-        for (int i = 0; i < (int)particles.size(); ++i) {
-            updateParticles(particles[i], i, VBO);
+		
+        //for (int i = 0; i < (int)particles.size(); ++i) {
+            updateParticles(particles[0], 0, VBO);
 			glDrawArrays(GL_QUADS, 0, 4);
-			glBindVertexArray(0);
-        }
+        //}
 		
 
 
