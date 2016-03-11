@@ -35,6 +35,7 @@ struct Particle {
 
 void simulate_particles(Particle * particles, int particle_count, float dt)
 {
+	
     for (int i = 0; i < particle_count; ++i) {
         particles[i].pos += particles[i].speed * dt;
         particles[i].speed -= particles[i].pos * dt;
@@ -66,7 +67,7 @@ int main(int argc, char ** argv)
         particles[i].pos.y = (float)(std::rand() % 1000 - 500) / 500.0f;
     }
 
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -75,11 +76,18 @@ int main(int argc, char ** argv)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+	float oldTime = 0;
+	float newTime = glfwGetTime();
+
     while (!glfwWindowShouldClose(window)) {
+
+		oldTime = newTime;
+		newTime = glfwGetTime();
+		float deltaTime = newTime - oldTime;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        simulate_particles(particles.data(), particles.size(), 1.0f / 60.0f);
+        simulate_particles(particles.data(), particles.size(), deltaTime);
 
         for (int i = 0; i < (int)particles.size(); ++i) {
             draw_quad(particles[i].pos);
