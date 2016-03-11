@@ -22,7 +22,14 @@ void draw_quad() {
         glColor3f(0., 0., 1.); glVertex3f( .75,  .75, 0.);
         glColor3f(1., 1., 0.); glVertex3f(-.75,  .75, 0.);
     glEnd();
-} 
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+}
 
 int main(int argc, char ** argv)
 {
@@ -32,6 +39,9 @@ int main(int argc, char ** argv)
     glfwInit();
 
     GLFWwindow * window = glfwCreateWindow(width, height, "Friday particle", NULL, NULL);
+    glfwSwapInterval(1);
+
+    glfwSetKeyCallback(window, key_callback);
 
     glfwMakeContextCurrent(window);
     glfwGetFramebufferSize(window, &width, &height);
@@ -40,7 +50,6 @@ int main(int argc, char ** argv)
     while (!glfwWindowShouldClose(window)) {
         draw_quad();
         glfwSwapBuffers(window);
+        glfwPollEvents();
     }
-
-    printf("hello world");
 }
