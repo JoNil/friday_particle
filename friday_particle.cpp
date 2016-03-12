@@ -50,7 +50,17 @@ varying vec2 tex;
 
 void main()
 {
-   gl_FragColor = vec4(tex.x, (2.0 * pos.x + 1.0) * 0.5 * tex.y, (2.0 * pos.y + 1.0) * 0.5, 1.0);
+    vec3 color = vec3(tex.x, (2.0 * pos.x + 1.0) * 0.5 * tex.y, (2.0 * pos.y + 1.0) * 0.5);
+
+    vec2 local = (tex - 0.5) * 2.0;
+
+    float r = sqrt(local.x*local.x + local.y*local.y);
+
+    if (r > 1.0) {
+        discard;
+    }
+
+    gl_FragColor = vec4(dot(color, vec3(0.5, 0.0, 0.5)), dot(color, vec3(0.5, 0.5, 0.0)), 0.0, 1.0);
 });
 
 static void print_shader_compile_error(uint32_t shader)
@@ -140,8 +150,8 @@ void simulate_particles(Particle * particles, int particle_count, float dt)
 
 int main(int argc, char ** argv)
 {
-    int width = 1024;
-    int height = 768;
+    int width = 720;
+    int height = 720;
 
     std::srand(std::time(0));
 
