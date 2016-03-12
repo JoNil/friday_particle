@@ -124,13 +124,14 @@ void simulate_particles(Particle * particles, int particle_count, float dt)
 		}
 		else
 		{
-			particles[i].acc.x = -particles[i].pos.x;
 			particles[i].acc.y = -(particles[i].pos.y + 0.5) * 2;
 			if (particles[i].pos.y < -0.5)
 			{
 				particles[i].acc.y = -(particles[i].pos.y + 0.5) * 20;
-				if (particles[i].acc.x < -0.05 && 0.05 < particles[i].acc.x)
+				if (particles[i].pos.x < -0.05 || 0.05 < particles[i].pos.x)
 					particles[i].acc.x = -particles[i].pos.x * 20;
+				else
+					particles[i].speed.x = 0;
 			}
 		}
 		particles[i].speed += particles[i].acc * dt;
