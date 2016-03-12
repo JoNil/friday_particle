@@ -32,21 +32,25 @@ void check_gl_error(const char * stmt, const char * fname, int line)
 const char * vertex_shader_source = GLSL(130,
 
 attribute vec3 vertex_pos;
+attribute vec2 vertex_tex;
 
 varying vec3 pos;
+varying vec2 tex;
 
 void main() {
     pos = vertex_pos;
+    tex = vertex_tex;
     gl_Position = vec4(vertex_pos, 1.0);
 });
 
 const char * fragment_shader_source = GLSL(130,
 
 varying vec3 pos;
+varying vec2 tex;
 
 void main()
 {
-   gl_FragColor = vec4(1.0, 2.0 * pos.x + 1.0, 2.0 * pos.y + 1.0, 1.0);
+   gl_FragColor = vec4(tex.x, (2.0 * pos.x + 1.0) * 0.5 * tex.y, (2.0 * pos.y + 1.0) * 0.5, 1.0);
 });
 
 static void print_shader_compile_error(uint32_t shader)
@@ -69,22 +73,34 @@ struct Particle {
 	float size = 0.1;
 };
 
-void updateParticles(Particle particle, GLfloat *vertices,  int offset) {
-	vertices[offset] = -particle.size / 2 + particle.pos.x;
-	vertices[offset + 1] = -particle.size / 2 + particle.pos.y; 
-	vertices[offset + 2] = -1.0f;
+void updateParticles(Particle particle, GLfloat *vertices, GLfloat *texs, int offset) {
+	vertices[offset*12 + 0] = -particle.size / 2 + particle.pos.x;
+	vertices[offset*12 + 1] = -particle.size / 2 + particle.pos.y; 
+	vertices[offset*12 + 2] = 0.0f;
 
-	vertices[offset + 3] = particle.size / 2 + particle.pos.x;
-	vertices[offset + 4] = -particle.size / 2 + particle.pos.y;
-	vertices[offset + 5] = -1.0f;
+	vertices[offset*12 + 3] = particle.size / 2 + particle.pos.x;
+	vertices[offset*12 + 4] = -particle.size / 2 + particle.pos.y;
+	vertices[offset*12 + 5] = 0.0f;
 
-	vertices[offset + 6] = particle.size / 2 + particle.pos.x;
-	vertices[offset + 7] = particle.size / 2 + particle.pos.y;
-	vertices[offset + 8] = -1.0f;
+	vertices[offset*12 + 6] = particle.size / 2 + particle.pos.x;
+	vertices[offset*12 + 7] = particle.size / 2 + particle.pos.y;
+	vertices[offset*12 + 8] = 0.0f;
 
-	vertices[offset + 9] = -particle.size / 2 + particle.pos.x;
-	vertices[offset + 10] = particle.size / 2 + particle.pos.y;
-	vertices[offset + 11] = - 1.0f;
+	vertices[offset*12 + 9] = -particle.size / 2 + particle.pos.x;
+	vertices[offset*12 + 10] = particle.size / 2 + particle.pos.y;
+	vertices[offset*12 + 11] = 0.0f;
+
+    texs[offset*8 + 0] = 0.0f;
+    texs[offset*8 + 1] = 0.0f;
+
+    texs[offset*8 + 2] = 1.0f;
+    texs[offset*8 + 3] = 0.0f;
+
+    texs[offset*8 + 4] = 1.0f;
+    texs[offset*8 + 5] = 1.0f;
+
+    texs[offset*8 + 6] = 0.0f;
+    texs[offset*8 + 7] = 1.0f;
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -182,12 +198,18 @@ int main(int argc, char ** argv)
 	float oldTime = 0;
 	float newTime = glfwGetTime();
 
-	GLuint VBO;
-	GLfloat particleVertices[numParticles * 12];
-	GL(glGenBuffers(1, &VBO));
-	GL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+	GLuint POS_VBO;
+    GLuint TEX_VBO;
+	std::vector<GLfloat> particleVertices(numParticles * 12);
+    std::vector<GLfloat> particleTexs(numParticles * 8);
+	GL(glGenBuffers(1, &POS_VBO));
+    GL(glGenBuffers(1, &TEX_VBO));
+    GL(glBindBuffer(GL_ARRAY_BUFFER, POS_VBO));
 	GL(glEnableVertexAttribArray(0));
 	GL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0));
+    GL(glBindBuffer(GL_ARRAY_BUFFER, TEX_VBO));
+    GL(glEnableVertexAttribArray(1));
+    GL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0));
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -199,13 +221,16 @@ int main(int argc, char ** argv)
 
         simulate_particles(particles.data(), particles.size(), deltaTime);
 
-
         for (int i = 0; i < (int)particles.size(); ++i) {
-            updateParticles(particles[i], particleVertices, i*12);	
+            updateParticles(particles[i], particleVertices.data(), particleTexs.data(), i);	
         }
-		GL(glBufferData(GL_ARRAY_BUFFER, sizeof(particleVertices), particleVertices, GL_STATIC_DRAW));
-		GL(glDrawArrays(GL_QUADS, 0, numParticles*4));
 
+        GL(glBindBuffer(GL_ARRAY_BUFFER, POS_VBO));
+		GL(glBufferData(GL_ARRAY_BUFFER, particleVertices.size() * 4, particleVertices.data(), GL_STATIC_DRAW));
+        GL(glBindBuffer(GL_ARRAY_BUFFER, TEX_VBO));
+        GL(glBufferData(GL_ARRAY_BUFFER, particleTexs.size() * 4, particleTexs.data(), GL_STATIC_DRAW));
+
+		GL(glDrawArrays(GL_QUADS, 0, numParticles*4));
 
         glfwSwapBuffers(window);
         glfwPollEvents();
