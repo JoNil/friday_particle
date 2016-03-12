@@ -43,6 +43,16 @@ void main() {
     gl_Position = vec4(vertex_pos, 1.0);
 });
 
+//const char * geometry_shader_source = GLSL(330,
+//	
+//
+//	varying vec3 pos;
+//
+//void main()
+//{
+//	gl_Position = vec4(position.x, position.y, 0.0f, 1.0f);
+//});
+
 const char * fragment_shader_source = GLSL(130,
 
 varying vec3 pos;
@@ -50,17 +60,16 @@ varying vec2 tex;
 
 void main()
 {
-    vec3 color = vec3(tex.x, (2.0 * pos.x + 1.0) * 0.5 * tex.y, (2.0 * pos.y + 1.0) * 0.5);
+    vec3 color = vec3(191.0/255.0, 0.0, 1.0);
 
     vec2 local = (tex - 0.5) * 2.0;
 
     float r = sqrt(local.x*local.x + local.y*local.y);
+	r = clamp(r, 0.0, 1.0);
+	float alpha = 1.5;
+	alpha*= pow(1.0 - r, 2.0);
 
-    if (r > 1.0) {
-        discard;
-    }
-
-    gl_FragColor = vec4(dot(color, vec3(0.5, 0.0, 0.5)), dot(color, vec3(0.5, 0.5, 0.0)), 0.0, 1.0);
+    gl_FragColor = vec4(color, alpha);
 });
 
 static void print_shader_compile_error(uint32_t shader)
@@ -181,9 +190,12 @@ int main(int argc, char ** argv)
     GL(glViewport(0, 0, width, height));
     GL(glClearColor(0.0f, 0.0f, 0.2f, 1.0f));
     GL(glDisable(GL_DEPTH_TEST));
+	GL(glEnable(GL_BLEND));
+	GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     int status = 0;
     uint32_t vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+	//uint32_t geometry_shader = glCreateShader(GL_GEOMETRY_SHADER);
     uint32_t fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     GL(glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr));
     GL(glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr));
