@@ -1,5 +1,5 @@
 #include <GL/glew.h>
-#include <GL/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 
 #include <cstdio>
@@ -46,6 +46,7 @@ static void print_shader_compile_error(uint32_t shader)
 struct Particle {
 	vec2 pos;
 	vec2 speed;
+	vec2 acc;
 	float size = 0.1;
 };
 
@@ -72,15 +73,28 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 void simulate_particles(Particle * particles, int particle_count, float dt)
 {
-	
     for (int i = 0; i < particle_count; ++i) {
-
-        float random_x = (float)(std::rand() % 1000 - 500) / 40000.0f;
-        float random_y = (float)(std::rand() % 1000 - 500) / 40000.0f;
-
-        particles[i].pos += particles[i].speed * dt;
-        particles[i].speed -= particles[i].pos * dt;
-        particles[i].speed += vec2(random_x, random_y);
+		//RAND_MAX = 32767
+		if (-0.55 < particles[i].pos.y && particles[i].pos.y < -0.45 && -0.05 < particles[i].pos.x && particles[i].pos.x < 0.05)
+		{
+			particles[i].speed.y = (float)(std::rand() % 1000 ) / 500.0f;
+			particles[i].speed.x = (float)(std::rand() % 2000 - 1000) / 1500.0f;
+			particles[i].acc.x = 0;
+			particles[i].acc.y = 0;
+		}
+		else
+		{
+			particles[i].acc.x = -particles[i].pos.x;
+			particles[i].acc.y = -(particles[i].pos.y + 0.5) * 2;
+			if (particles[i].pos.y < -0.5)
+			{
+				particles[i].acc.y = -(particles[i].pos.y + 0.5) * 20;
+				if (particles[i].acc.x < -0.05 && 0.05 < particles[i].acc.x)
+					particles[i].acc.x = -particles[i].pos.x * 20;
+			}
+		}
+		particles[i].speed += particles[i].acc * dt;
+        particles[i].pos += particles[i].speed * dt;		
     }
 }
 
@@ -111,8 +125,8 @@ int main(int argc, char ** argv)
     std::vector<Particle> particles(1000);
 
     for (int i = 0; i < (int)particles.size(); ++i) {
-        particles[i].pos.x = (float)(std::rand() % 1000 - 500) / 500.0f;
-        particles[i].pos.y = (float)(std::rand() % 1000 - 500) / 500.0f;
+        particles[i].pos.x = 0;
+        particles[i].pos.y = -0.5;
     }
 
     glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
